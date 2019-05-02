@@ -72,7 +72,7 @@ Ideen / Todo
 //#define UHR_169                     // Uhr mit zusätzlichen LED's um den Rahmen seitlich zu beleuchten
 //#define UHR_242                       // Uhr mit Wettervorhersage 242 LED's --> Bitte die Library "ArduinoJson" im Library Manager installieren!
 
-#define SERNR 100              //um das eeprom zu löschen, bzw. zu initialisieren, hier eine andere Seriennummer eintragen!
+#define SERNR 101              //um das eeprom zu löschen, bzw. zu initialisieren, hier eine andere Seriennummer eintragen!
 
 // Wenn die Farben nicht passen können sie hier angepasst werden:
 #define Brg   // RGB-Stripe mit dem Chip WS2812b und dem Layout Brg
@@ -1242,11 +1242,16 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         }
         if (cc == 96) {       // Lauftext speichern
           G.conf = 96;
-          ii = 0;
-          for (int k=9;k<39;k++){
-            if (str[k]!=' '){ G.ltext[ii] = str[k];  ii++; }
+          G.ltext[30] = '\0';
+          bool entfernen = true;
+          for (int k=38;k>=8;k--){   // Leerzeichen am Ende entfernen
+            if (entfernen && (str[k]==' ')) {
+              G.ltext[k-9] = '\0';
+            } else {
+              entfernen = false;
+              G.ltext[k-9] = str[k];
+            }
           }
-          G.ltext[ii] = '\0';
           break;
         }
         if (cc == 97) {       // Zeitserver speichern

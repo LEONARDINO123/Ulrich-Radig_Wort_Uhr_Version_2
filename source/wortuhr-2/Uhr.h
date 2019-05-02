@@ -111,7 +111,7 @@ struct GLOBAL {
   int zeige_min;
   char zeitserver[30];   
   char hostname[30];  
-  char ltext[30];   
+  char ltext[31];   
   int hh;  
   int h6;
   int h8;
