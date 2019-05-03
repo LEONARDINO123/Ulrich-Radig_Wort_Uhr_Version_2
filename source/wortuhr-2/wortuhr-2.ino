@@ -72,7 +72,7 @@ Ideen / Todo
 //#define UHR_169                     // Uhr mit zusätzlichen LED's um den Rahmen seitlich zu beleuchten
 //#define UHR_242                       // Uhr mit Wettervorhersage 242 LED's --> Bitte die Library "ArduinoJson" im Library Manager installieren!
 
-#define SERNR 101              //um das eeprom zu löschen, bzw. zu initialisieren, hier eine andere Seriennummer eintragen!
+#define SERNR 102              //um das eeprom zu löschen, bzw. zu initialisieren, hier eine andere Seriennummer eintragen!
 
 // Wenn die Farben nicht passen können sie hier angepasst werden:
 #define Brg   // RGB-Stripe mit dem Chip WS2812b und dem Layout Brg
@@ -155,6 +155,9 @@ Timezone tzc(CEST, CET);
 time_t ltime, utc;
 TimeChangeRule *tcr;
 
+#define EEPROM_SIZE 2048
+_Static_assert(sizeof(G) <= EEPROM_SIZE, "Datenstruktur G zu gross für reservierten EEPROM Bereich");
+
 //------------------------------------------------------------------------------
 // Start setup()
 //------------------------------------------------------------------------------
@@ -174,6 +177,8 @@ void setup()
    USE_SERIAL.println("");
    USE_SERIAL.println("--------------------------------------");
    USE_SERIAL.println ( "Begin Setup" );
+   USE_SERIAL.print   ( "sizeof(G) = " );
+   USE_SERIAL.println ( sizeof(G));
    USE_SERIAL.println("--------------------------------------");
   #endif
 
@@ -185,12 +190,12 @@ void setup()
   //-------------------------------------
   // EEPROM lesen / initialisieren
   //-------------------------------------
-  EEPROM.begin(512);
+  EEPROM.begin(EEPROM_SIZE);
 
   eeprom_read();
 
   if (G.sernr !=SERNR){
-    for( int i = 0; i < 512; i++ ){ EEPROM.write(i,i); }
+    for( int i = 0; i < EEPROM_SIZE; i++ ){ EEPROM.write(i,i); }
     EEPROM.commit();
 
     G.sernr = SERNR;
@@ -1244,7 +1249,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
           G.conf = 96;
           G.ltext[30] = '\0';
           bool entfernen = true;
-          for (int k=38;k>=8;k--){   // Leerzeichen am Ende entfernen
+          for (int k=38;k>=9;k--){   // Leerzeichen am Ende entfernen
             if (entfernen && (str[k]==' ')) {
               G.ltext[k-9] = '\0';
             } else {
@@ -1261,20 +1266,44 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
           G.zeitserver[ii] = '\0';
           break;
         }
-         if (cc == 99) {       // WLAN-Daten speichern und neu starten
+        if (cc == 99) {       // WLAN-Daten speichern und neu starten
           G.conf = 99;
+          /*
           ii = 0;
           for (int k=9;k<34;k++){
             if (str[k]!=' '){ G.ssid[ii] = str[k]; ii++; }
           }
           G.ssid[ii]='\0';
+          */
+          G.ssid[25] = '\0';
+          bool entfernen = true;
+          for (int k=33;k>=9;k--){   // Leerzeichen am Ende entfernen
+            if (entfernen && (str[k]==' ')) {
+              G.ssid[k-9] = '\0';
+            } else {
+              entfernen = false;
+              G.ssid[k-9] = str[k];
+            }
+          }
+          /*
           ii = 0;
           for (int k=34;k<59;k++){ 
             if (str[k]!=' '){ G.passwd[ii] = str[k]; ii++; }
           }
           G.passwd[ii]='\0';         
-              break;
-              }
+          */
+          G.passwd[25] = '\0';
+          entfernen = true;
+          for (int k=33+25;k>=9+25;k--){   // Leerzeichen am Ende entfernen
+            if (entfernen && (str[k]==' ')) {
+              G.passwd[k-9-25] = '\0';
+            } else {
+              entfernen = false;
+              G.passwd[k-9-25] = str[k];
+            }
+          }
+          break;
+        }
         if (cc == 100) {      // Reset
           G.conf = 100;
           break;
