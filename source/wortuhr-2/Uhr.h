@@ -88,8 +88,8 @@ const char* VER = "2.2.0";  // Software Version
 
 struct GLOBAL {
   int sernr;
-  char ssid[25];    
-  char passwd[25];
+  char ssid[26];    
+  char passwd[26];
   int prog;  
   int param1;  
   int param2;        
@@ -196,8 +196,8 @@ const long interval = 1000;   // 1 Sekunde
 
 uint32_t uhrzeit;
 
-char str[300];
-char s[5]; 
+char str[400];
+char s[16]; 
 
 int dim[20] = {30,50,70,90,110,130,140,160,200,255,255,200,160,100,80,60,40,20,10,0};
 int diff[20]= {-30,-20,-20,-20,-20,-20,-10,-20,-40,-55,0,55,40,60,20,20,20,20,10,10};
